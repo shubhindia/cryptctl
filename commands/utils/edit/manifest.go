@@ -25,6 +25,7 @@ func NewManifest(in io.Reader) (Manifest, error) {
 		return nil, errors.Wrap(err, "error reading manifest")
 	}
 
+	objects := []*Object{}
 	if emptyRegexp.MatchString(buf.String()) {
 		return nil, fmt.Errorf("empty object")
 	}
@@ -34,5 +35,16 @@ func NewManifest(in io.Reader) (Manifest, error) {
 		return nil, errors.Wrap(err, "error decoding object")
 	}
 
-	return obj, nil
+	objects = append(objects, obj)
+	return objects, nil
+}
+
+func (m Manifest) Decrypt() error {
+	for _, obj := range m {
+		err := obj.Decrypt()
+		if err != nil {
+			return errors.Wrap(err, "error decrypting object")
+		}
+	}
+	return nil
 }

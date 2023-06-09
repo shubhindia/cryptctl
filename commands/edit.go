@@ -9,6 +9,9 @@ import (
 	"github.com/shubhindia/hcictl/commands/utils/edit"
 	"github.com/shubhindia/hcictl/common"
 	"github.com/urfave/cli/v2"
+	"k8s.io/client-go/kubernetes/scheme"
+
+	secretsv1alpha1 "github.com/shubhindia/encrypted-secrets/api/v1alpha1"
 )
 
 func init() {
@@ -22,6 +25,11 @@ func init() {
 			}
 			if ctx.Args().Len() > 1 {
 				return fmt.Errorf("too many arguments")
+			}
+			// register the apis
+			err := secretsv1alpha1.AddToScheme(scheme.Scheme)
+			if err != nil {
+				return fmt.Errorf("error registering apis %s", err.Error())
 			}
 			return nil
 		},
@@ -50,7 +58,10 @@ func init() {
 				return errors.Wrap(err, "error decoding input YAML")
 			}
 
-			fmt.Printf("%+v", inManifest)
+			err = inManifest.Decrypt()
+			if err != nil {
+				return errors.Wrap(err, "error decrypting input manifest")
+			}
 
 			return nil
 		},

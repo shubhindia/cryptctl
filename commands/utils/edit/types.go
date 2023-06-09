@@ -4,10 +4,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	secretsv1alpha1 "github.com/shubhindia/encrypted-secrets/api/v1alpha1"
+	hacksecretsv1alpha1 "github.com/shubhindia/hcictl/commands/utils/apis/secrets/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type Manifest *Object
+type Manifest []*Object
 
 type Object struct {
 	// The original text as parsed by NewYAMLOrJSONDecoder.
@@ -18,6 +19,8 @@ type Object struct {
 
 	// Tracking for the various stages of encryption and decryption.
 	OrigEnc  *secretsv1alpha1.EncryptedSecret
+	OrigDec  *hacksecretsv1alpha1.DecryptedSecret
+	AfterDec *hacksecretsv1alpha1.DecryptedSecret
 	AfterEnc *secretsv1alpha1.EncryptedSecret
 	Kind     string
 	Data     map[string]string

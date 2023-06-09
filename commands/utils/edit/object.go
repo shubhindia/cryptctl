@@ -7,7 +7,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 
 	secretsv1alpha1 "github.com/shubhindia/encrypted-secrets/api/v1alpha1"
-
+	hacksecretsv1alpha1 "github.com/shubhindia/hcictl/commands/utils/apis/secrets/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -16,8 +16,6 @@ const (
 )
 
 var dataRegexp *regexp.Regexp
-var keyRegexp *regexp.Regexp
-var nonStringRegexp *regexp.Regexp
 
 type Payload struct {
 	Key     []byte
@@ -27,41 +25,17 @@ type Payload struct {
 
 func init() {
 	dataRegexp = regexp.MustCompile(`(?ms)kind: (EncryptedSecret|DecryptedSecret).*?(^data:.*?)\z`)
-	keyRegexp = regexp.MustCompile("" +
-		// Turn on multiline mode for the whole pattern, ^ and $ will match on lines rather than start and end of whole string.
-		`(?m)` +
-		// Look for the key, some whitespace, then some non-space-or-:, then :
-		`^[ \t]+([^:\n\r]+):` +
-		// Whitespace between the key's : and the value
-		`[ \t]+` +
-		// Start an alternation for block scalars and normal values.
-		`(?:` +
-		// Match block scalars first because they would otherwise match the normal value pattern.
-		// Looks for the | or >, optional flags, then lines with 4 spaces of indentation. A better version of this
-		// would look more like ([|>]\n([ \t]+).+?\n(?:\3.+?\n)*) and would use a backreference instead of hardwiring
-		// things but Go, or rather RE2, refuses to support backrefs because they can be slow. Blaaaaaaah.
-		`([|>].*?(?:\n    .+?$)+)` +
-		// Alternation between block scalar and normal values.
-		`|` +
-		// Look for a normal value, something on a single line with optional trailing whitespace.
-		`(.+?)[ \t]*$` +
-		// Close the block vs. normal alternation.
-		`)`,
-	)
-	nonStringRegexp = regexp.MustCompile(`^(\d+(\.\d+)?|true|false|null|\[.*\]|)$`)
+
 }
 
 func NewObject(raw []byte) (*Object, error) {
 
-	// Here, we need to be able to edit the objects which are not registered in ridectl
-	// So we are deserializing the all the object, if object is not registered, UniversalDeserializer()
-	// will return error 'no kind "xyz" is registered for version "abc"', with return the object with Raw
-	// field set in it.
-
 	o := &Object{Raw: raw}
+
 	// Create new codec with strict mode on; this will strictly check objects spec
 	codecs := serializer.NewCodecFactory(scheme.Scheme, serializer.EnableStrict)
 	obj, _, err := codecs.UniversalDeserializer().Decode(raw, nil, nil)
+
 	if err != nil {
 		if ok, _ := regexp.MatchString("no kind(.*)is registered for version", err.Error()); ok {
 			return o, nil
@@ -75,6 +49,7 @@ func NewObject(raw []byte) (*Object, error) {
 	// Check if this an EncryptedSecret.
 	enc, ok := obj.(*secretsv1alpha1.EncryptedSecret)
 	if ok {
+
 		o.OrigEnc = enc
 		o.Kind = "EncryptedSecret"
 		o.Data = enc.Data
@@ -105,4 +80,22 @@ func NewObject(raw []byte) (*Object, error) {
 
 	}
 	return o, nil
+}
+
+func (o *Object) Decrypt() error {
+
+	if o.Kind == "" {
+		return nil
+	}
+
+	dec := &hacksecretsv1alpha1.DecryptedSecret{ObjectMeta: o.OrigEnc.ObjectMeta, Data: map[string]string{}}
+	for key, value := range o.OrigEnc.Data {
+		dec.Data[key] = value
+	}
+
+	o.OrigDec = dec
+	o.Kind = "DecryptedSecret"
+	o.Data = dec.Data
+	return nil
+
 }
