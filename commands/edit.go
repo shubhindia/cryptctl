@@ -1,12 +1,12 @@
 package commands
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
 
 	"github.com/pkg/errors"
+	"github.com/shubhindia/hcictl/commands/utils/edit"
 	"github.com/shubhindia/hcictl/common"
 	"github.com/urfave/cli/v2"
 )
@@ -44,11 +44,13 @@ func init() {
 				inStream = inFile
 			}
 
-			buf := new(bytes.Buffer)
-			buf.ReadFrom(inStream)
-			s := buf.String()
+			// Parse the input file to objects.
+			inManifest, err := edit.NewManifest(inStream)
+			if err != nil {
+				return errors.Wrap(err, "error decoding input YAML")
+			}
 
-			fmt.Println(s)
+			fmt.Printf("%+v", inManifest)
 
 			return nil
 		},
