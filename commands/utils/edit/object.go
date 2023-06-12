@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/kubernetes/scheme"
 
+	"github.com/pkg/errors"
 	secretsv1alpha1 "github.com/shubhindia/encrypted-secrets/api/v1alpha1"
 	hacksecretsv1alpha1 "github.com/shubhindia/hcictl/commands/utils/apis/secrets/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,6 +21,7 @@ const (
 
 var (
 	dataRegexp      *regexp.Regexp
+	keyRegexp       *regexp.Regexp
 	nonStringRegexp *regexp.Regexp
 )
 
@@ -31,6 +33,27 @@ type Payload struct {
 
 func init() {
 	dataRegexp = regexp.MustCompile(`(?ms)kind: (EncryptedSecret|DecryptedSecret).*?(^data:.*?)\z`)
+	keyRegexp = regexp.MustCompile("" +
+		// Turn on multiline mode for the whole pattern, ^ and $ will match on lines rather than start and end of whole string.
+		`(?m)` +
+		// Look for the key, some whitespace, then some non-space-or-:, then :
+		`^[ \t]+([^:\n\r]+):` +
+		// Whitespace between the key's : and the value
+		`[ \t]+` +
+		// Start an alternation for block scalars and normal values.
+		`(?:` +
+		// Match block scalars first because they would otherwise match the normal value pattern.
+		// Looks for the | or >, optional flags, then lines with 4 spaces of indentation. A better version of this
+		// would look more like ([|>]\n([ \t]+).+?\n(?:\3.+?\n)*) and would use a backreference instead of hardwiring
+		// things but Go, or rather RE2, refuses to support backrefs because they can be slow. Blaaaaaaah.
+		`([|>].*?(?:\n    .+?$)+)` +
+		// Alternation between block scalar and normal values.
+		`|` +
+		// Look for a normal value, something on a single line with optional trailing whitespace.
+		`(.+?)[ \t]*$` +
+		// Close the block vs. normal alternation.
+		`)`,
+	)
 	nonStringRegexp = regexp.MustCompile(`^(\d+(\.\d+)?|true|false|null|\[.*\]|)$`)
 
 }
@@ -62,13 +85,13 @@ func NewObject(raw []byte) (*Object, error) {
 		o.Data = enc.Data
 	}
 
-	// // or a DecryptedSecret.
-	// dec, ok := obj.(*hacksecretsv1beta2.DecryptedSecret)
-	// if ok {
-	// 	o.AfterDec = dec
-	// 	o.Kind = "DecryptedSecret"
-	// 	o.Data = dec.Data
-	// }
+	// or a DecryptedSecret.
+	dec, ok := obj.(*hacksecretsv1alpha1.DecryptedSecret)
+	if ok {
+		o.AfterDec = dec
+		o.Kind = "DecryptedSecret"
+		o.Data = dec.Data
+	}
 
 	if o.Kind != "" {
 		// Run the regex parse. If you are reading this code, I am sorry and yes I
@@ -84,9 +107,55 @@ func NewObject(raw []byte) (*Object, error) {
 		o.KindLoc.End = match[3]
 		o.DataLoc.Start = match[4]
 		o.DataLoc.End = match[5]
+		if len(o.Data) > 0 {
+			locs, err := newKeysLocations(raw[o.DataLoc.Start:o.DataLoc.End], o.DataLoc.Start)
+			if err != nil {
+				// Also shouldn't happen.
+				panic(err.Error())
+			}
+			o.KeyLocs = locs
+		}
 
+		// A safety check for now.
+		if len(o.Data) != len(o.KeyLocs) {
+			panic("key count mismatch")
+		}
 	}
 	return o, nil
+}
+
+func newKeysLocations(raw []byte, offset int) ([]KeysLocation, error) {
+	matches := keyRegexp.FindAllSubmatchIndex(raw, -1)
+	if matches == nil {
+		return nil, errors.New("unable to parse keys")
+	}
+	locs := []KeysLocation{}
+	for _, match := range matches {
+		keyStart := match[2]
+		keyEnd := match[3]
+		blockValueStart := match[4]
+		blockValueEnd := match[5]
+		normalValueStart := match[6]
+		normalValueEnd := match[7]
+		var valueLoc TextLocation
+		if normalValueStart == -1 {
+			if raw[blockValueStart] != '|' {
+				return nil, errors.New("only | block scalars are supported")
+			}
+			valueLoc.Start = blockValueStart + offset
+			valueLoc.End = blockValueEnd + offset
+		} else {
+			valueLoc.Start = normalValueStart + offset
+			valueLoc.End = normalValueEnd + offset
+		}
+		key := string(raw[keyStart:keyEnd])
+		if key[0] == '#' {
+			// Go doesn't do negative lookaheads to easier to filter comments out here.
+			continue
+		}
+		locs = append(locs, KeysLocation{TextLocation: valueLoc, Key: key})
+	}
+	return locs, nil
 }
 
 func (o *Object) Decrypt() error {
@@ -97,9 +166,10 @@ func (o *Object) Decrypt() error {
 
 	dec := &hacksecretsv1alpha1.DecryptedSecret{ObjectMeta: o.OrigEnc.ObjectMeta, Data: map[string]string{}}
 	for key, value := range o.OrigEnc.Data {
-		dec.Data[key] = value
+		fmt.Printf("Encrypted value for key %s is %s", key, value)
 	}
 
+	dec.Data["test"] = "Hello World"
 	o.OrigDec = dec
 	o.Kind = "DecryptedSecret"
 	o.Data = dec.Data
@@ -124,6 +194,7 @@ func (o *Object) Serialize(out io.Writer) error {
 	if err != nil {
 		return err
 	}
+
 	// Track where we are up to.
 	carry := o.KindLoc.End
 	for _, keyLoc := range o.KeyLocs {

@@ -67,13 +67,14 @@ func init() {
 				return errors.Wrap(err, "error decoding input YAML")
 			}
 
+			// decrypt the data
 			err = inManifest.Decrypt()
 			if err != nil {
 				return errors.Wrap(err, "error decrypting input manifest")
 			}
 
 			// Edit!
-			afterManifest, err := editObjects(inManifest, "")
+			_, err = editObjects(inManifest, "")
 			if err != nil {
 				return errors.Wrap(err, "error editing objects")
 			}
@@ -82,12 +83,6 @@ func init() {
 			// 1. Convert back to encryptedSecrets after editing
 			// 2. Actually decrypt and encrypt the yaml
 
-			outFile, err := os.Create(fileName)
-			if err != nil {
-				return errors.Wrapf(err, "error opening %s for writing", fileName)
-			}
-			defer outFile.Close()
-			_ = afterManifest.Serialize(outFile)
 			return nil
 
 		},
