@@ -35,6 +35,7 @@ type Object struct {
 	// Byte coordinates for areas of the raw text we need to edit when re-serializing.
 	KindLoc TextLocation
 	DataLoc TextLocation
+	KeyLocs []KeysLocation
 }
 
 type TextLocation struct {

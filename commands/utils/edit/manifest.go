@@ -48,3 +48,18 @@ func (m Manifest) Decrypt() error {
 	}
 	return nil
 }
+
+func (m Manifest) Serialize(out io.Writer) error {
+	first := true
+	for _, obj := range m {
+		if !first {
+			_, _ = out.Write([]byte("---\n"))
+		}
+		first = false
+		err := obj.Serialize(out)
+		if err != nil {
+			return errors.Wrapf(err, "error serializing %s/%s", obj.Meta.GetNamespace(), obj.Meta.GetName())
+		}
+	}
+	return nil
+}

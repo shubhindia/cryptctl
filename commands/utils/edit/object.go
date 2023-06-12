@@ -1,7 +1,10 @@
 package edit
 
 import (
+	"fmt"
+	"io"
 	"regexp"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -15,7 +18,10 @@ const (
 	nonceLength = 24
 )
 
-var dataRegexp *regexp.Regexp
+var (
+	dataRegexp      *regexp.Regexp
+	nonStringRegexp *regexp.Regexp
+)
 
 type Payload struct {
 	Key     []byte
@@ -25,6 +31,7 @@ type Payload struct {
 
 func init() {
 	dataRegexp = regexp.MustCompile(`(?ms)kind: (EncryptedSecret|DecryptedSecret).*?(^data:.*?)\z`)
+	nonStringRegexp = regexp.MustCompile(`^(\d+(\.\d+)?|true|false|null|\[.*\]|)$`)
 
 }
 
@@ -98,4 +105,68 @@ func (o *Object) Decrypt() error {
 	o.Data = dec.Data
 	return nil
 
+}
+
+func (o *Object) Serialize(out io.Writer) error {
+	// Check if this is one of the two types we care about.
+	if o.Data == nil {
+		// Nope, we're out.
+		_, err := out.Write(o.Raw)
+		return err
+	}
+
+	// Start writing!
+	_, err := out.Write(o.Raw[0:o.KindLoc.Start])
+	if err != nil {
+		return err
+	}
+	_, err = out.Write([]byte(o.Kind))
+	if err != nil {
+		return err
+	}
+	// Track where we are up to.
+	carry := o.KindLoc.End
+	for _, keyLoc := range o.KeyLocs {
+		newValue, ok := o.Data[keyLoc.Key]
+		if !ok {
+			panic("key from location not found in data")
+		}
+
+		// Check for a multiline value.
+		if strings.ContainsRune(newValue, '\n') {
+			var buf strings.Builder
+			buf.WriteString("|")
+			lines := strings.Split(newValue, "\n")
+			// Trim the trailing newline, basically.
+			if lines[len(lines)-1] == "" {
+				lines = lines[:len(lines)-1]
+			}
+			for _, line := range lines {
+				// Hardwire to 4 spaces of indentation, which assumes 2 spaces on the keys.
+				buf.WriteString("\n    ")
+				buf.WriteString(line)
+			}
+			newValue = buf.String()
+		}
+
+		// Check for things that YAML thinks aren't strings that might show up in the value.
+		if nonStringRegexp.MatchString(newValue) {
+			newValue = fmt.Sprintf(`"%s"`, newValue)
+		}
+		_, err = out.Write(o.Raw[carry:keyLoc.Start])
+		if err != nil {
+			return err
+		}
+		_, err = out.Write([]byte(newValue))
+		if err != nil {
+			return err
+		}
+		carry = keyLoc.End
+	}
+	_, err = out.Write(o.Raw[carry:])
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
