@@ -18,7 +18,7 @@ var whitespaceRegexp *regexp.Regexp
 
 func init() {
 
-	cliCmd := cli.Command{
+	editCmd := cli.Command{
 		Name:  "edit",
 		Usage: "edit encryptedSecrets manifest",
 		Before: func(ctx *cli.Context) error {
@@ -121,7 +121,7 @@ func init() {
 		},
 	}
 
-	common.RegisterCommand(cliCmd)
+	common.RegisterCommand(editCmd)
 }
 
 func editObjects(data []byte) ([]byte, error) {
