@@ -1,13 +1,7 @@
 package commands
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/md5"
-	"encoding/base64"
-	"encoding/hex"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/shubhindia/hcictl/common"
@@ -64,7 +58,7 @@ func init() {
 
 			// decrypt the data in encryptedSecrets
 			for key, value := range encryptedSecret.Data {
-				decryptedString := decodeAndDecrypt(value, keyPhrase)
+				decryptedString := editutils.DecodeAndDecrypt(value, keyPhrase)
 
 				decryptedData[key] = string(decryptedString)
 			}
@@ -79,32 +73,4 @@ func init() {
 	}
 
 	common.RegisterCommand(cliCmd)
-}
-
-func mdHashing(input string) string {
-	byteInput := []byte(input)
-	md5Hash := md5.Sum(byteInput)
-	return hex.EncodeToString(md5Hash[:]) // by referring to it as a string
-}
-
-func decodeAndDecrypt(encoded string, keyPhrase string) []byte {
-	ciphered, _ := base64.StdEncoding.DecodeString(encoded)
-	hashedPhrase := mdHashing(keyPhrase)
-	aesBlock, err := aes.NewCipher([]byte(hashedPhrase))
-	if err != nil {
-		log.Fatalln(err)
-	}
-	gcmInstance, err := cipher.NewGCM(aesBlock)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	nonceSize := gcmInstance.NonceSize()
-	nonce, cipheredText := ciphered[:nonceSize], ciphered[nonceSize:]
-
-	originalText, err := gcmInstance.Open(nil, nonce, cipheredText, nil)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	return originalText
-
 }
