@@ -11,6 +11,7 @@ With Cryptctl, you can easily update encrypted secrets within your Kubernetes cl
 
 - **Simplified Management:** Since, the secrets are encrypted, they can be easily stored in a repository. Once, the `EncryptedSecret` object is applied, `encrypted-secrets` controller takes care of decrypting the provided secrets and creates a k8s secret with decrpted values. Which can be access by the pod as required.
 
-https://github.com/shubhindia/cryptctl/assets/7694806/c36853b8-e373-4c38-840c-0ff9a8b9cfcf
 
+Here's a **`cryptctl`** demo:
 
+![cryptctl demo GIF](img/cryptctl-edit-demo.gif)
