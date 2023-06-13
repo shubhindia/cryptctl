@@ -28,7 +28,14 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
-      - name: build (GOARCH=arm64)
+      - name: build
         run: |
           make ARCH=arm64 build_macos
           make ARCH=amd64 build_macos
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          go install github.com/tcnksm/ghr@latest
+          ghr -c ${{ github.sha }} ${{ github.ref_name }} bin/
