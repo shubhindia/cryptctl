@@ -70,7 +70,7 @@ func init() {
 				return fmt.Errorf("error marshaling encryptedSecret %s", err.Error())
 			}
 
-			err = os.WriteFile(fileName, newEncrypted, 0777)
+			err = os.WriteFile(fileName, newEncrypted, 0600)
 			if err != nil {
 				return fmt.Errorf("error writing EncryptedSecret %s", err)
 			}
