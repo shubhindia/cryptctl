@@ -1,4 +1,4 @@
-module github.com/shubhindia/hcictl
+module github.com/shubhindia/cryptctl
 
 go 1.20
 

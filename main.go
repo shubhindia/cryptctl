@@ -6,15 +6,15 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 
-	_ "github.com/shubhindia/hcictl/commands"
-	"github.com/shubhindia/hcictl/common"
+	_ "github.com/shubhindia/cryptctl/commands"
+	"github.com/shubhindia/cryptctl/common"
 )
 
 func main() {
 
 	app := cli.NewApp()
-	app.Name = "hcictl"
-	app.Usage = "hcictl is a command line tool"
+	app.Name = "cryptctl"
+	app.Usage = "cryptctl is a command line tool"
 	app.Version = common.Version()
 	app.Authors = []*cli.Author{
 		{

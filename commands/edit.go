@@ -7,11 +7,11 @@ import (
 	"os/exec"
 	"regexp"
 
-	"github.com/shubhindia/hcictl/common"
+	"github.com/shubhindia/cryptctl/common"
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v2"
 
-	editutils "github.com/shubhindia/hcictl/commands/utils/edit"
+	editutils "github.com/shubhindia/cryptctl/commands/utils/edit"
 )
 
 var whitespaceRegexp *regexp.Regexp
@@ -23,7 +23,7 @@ func init() {
 		Usage: "edit encryptedSecrets manifest",
 		Before: func(ctx *cli.Context) error {
 			if ctx.Args().First() == "" {
-				return fmt.Errorf("hcictl edit expectes a file to edit")
+				return fmt.Errorf("cryptctl edit expectes a file to edit")
 			}
 
 			if ctx.Args().Len() > 1 {
