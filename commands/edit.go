@@ -167,10 +167,10 @@ func editObjects(data []byte) ([]byte, error) {
 		if bytes.Equal(editorBuf.Bytes(), afterBuf.Bytes()) {
 			fmt.Println("Edit cancelled. No changes made")
 			os.Exit(0)
+		} else {
+			// return the edited bytes
+			return afterBuf.Bytes(), nil
 		}
-
-		// return the edited bytes
-		return afterBuf.Bytes(), nil
 
 	}
 
