@@ -17,3 +17,18 @@ jobs:
         with:
           args: --timeout 5m
           skip-cache: true
+
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    needs: lint
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+      - name: build (GOARCH=arm64)
+        run: |
+          make ARCH=arm64 build_macos
+          make ARCH=amd64 build_macos
