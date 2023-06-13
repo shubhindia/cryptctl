@@ -1,5 +1,9 @@
 # `cryptctl` CLI Tool for managing [EncryptedSecrets](https://github.com/shubhindia/encrypted-secrets)
 
+
+[![Build Status](https://github.com/shubhindia/cryptctl/workflows/CI/badge.svg)](https://github.com/shubhindia/cryptctl/actions?query=workflow%3ACI+branch%3Amain)
+[![License](https://img.shields.io/badge/LICENSE-Apache2.0-ff69b4.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
+
 ## Note: `cryptctl` is currently a work in progress and is in the alpha stage. Please use it with caution in production environments.
 ## What is `cryptctl`?
 
