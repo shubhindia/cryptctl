@@ -14,4 +14,8 @@ With Cryptctl, you can easily update encrypted secrets within your Kubernetes cl
 
 Here's a **`cryptctl`** demo:
 
-![cryptctl demo GIF](img/cryptctl-edit-demo.gif)
+- `cryptctl edit <filename>`
+![cryptctl edit demo GIF](img/cryptctl-edit-demo.gif)
+
+- `cryptctl create -f <filename> -p <provider>`
+![cryptctl edit demo GIF](img/cryptctl-create-demo.gif)
