@@ -82,13 +82,39 @@ func init() {
 			}
 
 			// unmarshal the edited yaml into decryptedSecrets again to encrypt the new secrets
-			var newDecryptedSecrets editutils.DecryptedSecret
+			var newDecryptedSecret editutils.DecryptedSecret
 
-			err = yaml.Unmarshal(editedManitest, &newDecryptedSecrets)
+			err = yaml.Unmarshal(editedManitest, &newDecryptedSecret)
 			if err != nil {
 				return fmt.Errorf("error unmarshaling file %s", err.Error())
 			}
-			fmt.Printf("%+v", newDecryptedSecrets)
+
+			// prepare new encryptedSecret to be written
+			newEncryptedSecret := encryptedSecret
+
+			newEncryptedData := make(map[string]string)
+
+			for key, value := range newDecryptedSecret.Data {
+				encryptedString, err := editutils.EncryptAndEncode(value, keyPhrase)
+				if err != nil {
+					return fmt.Errorf("error encrypting new secrets %s", err)
+				}
+				newEncryptedData[key] = encryptedString
+			}
+
+			// write newly encrypted data
+			newEncryptedSecret.Data = newEncryptedData
+
+			// write the contents to yaml
+			newEncrypted, err := yaml.Marshal(&newEncryptedSecret)
+			if err != nil {
+				return fmt.Errorf("error marshaling encryptedSecret %s", err.Error())
+			}
+
+			err = os.WriteFile(fileName, newEncrypted, 0777)
+			if err != nil {
+				return fmt.Errorf("error writing EncryptedSecret %s", err)
+			}
 
 			return nil
 

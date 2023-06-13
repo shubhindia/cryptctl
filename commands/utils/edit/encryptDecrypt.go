@@ -4,8 +4,10 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/md5"
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"io"
 	"log"
 )
 
@@ -35,4 +37,26 @@ func DecodeAndDecrypt(encoded string, keyPhrase string) []byte {
 	}
 	return originalText
 
+}
+
+func EncryptAndEncode(value string, keyPhrase string) (string, error) {
+
+	aesBlock, err := aes.NewCipher([]byte(mdHashing(keyPhrase)))
+	if err != nil {
+		return "", err
+	}
+
+	gcmInstance, err := cipher.NewGCM(aesBlock)
+	if err != nil {
+		return "", err
+	}
+
+	nonce := make([]byte, gcmInstance.NonceSize())
+	_, _ = io.ReadFull(rand.Reader, nonce)
+
+	cipheredText := gcmInstance.Seal(nonce, nonce, []byte(value), nil)
+
+	encoded := base64.StdEncoding.EncodeToString(cipheredText)
+
+	return encoded, nil
 }
