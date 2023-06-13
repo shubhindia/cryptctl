@@ -1,0 +1,5 @@
+# ignore build dir
+build
+
+# ignore yamls 
+*.yaml
