@@ -3,6 +3,7 @@ module github.com/shubhindia/cryptctl
 go 1.20
 
 require (
+	github.com/shubhindia/crypt-core v0.0.0-20230613151302-53fd8b3ac786
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.25.5
 	gopkg.in/yaml.v2 v2.4.0
