@@ -12,6 +12,8 @@ import (
 	"gopkg.in/yaml.v2"
 
 	editutils "github.com/shubhindia/cryptctl/commands/utils/edit"
+
+	providers "github.com/shubhindia/crypt-core/providers"
 )
 
 var whitespaceRegexp *regexp.Regexp
@@ -47,6 +49,12 @@ func init() {
 				return fmt.Errorf("error unmarshaling file %s", err.Error())
 			}
 
+			// get the provider
+			// not handling the error here because this should never fail
+
+			// ToDo := use k8s labels here so that we can actually use label methods instead of converting interface to map again
+			provider := encryptedSecret.Metadata["labels"].(map[interface{}]interface{})["app.kubernetes.io/provider"]
+
 			// prepare decryptedSecret to be edited
 			decryptedSecret := editutils.DecryptedSecret{
 				ApiVersion: encryptedSecret.ApiVersion,
@@ -54,18 +62,16 @@ func init() {
 				Metadata:   encryptedSecret.Metadata,
 			}
 
-			keyPhrase := os.Getenv("KEYPHRASE")
-			if keyPhrase == "" {
-				return fmt.Errorf("keyphrase not found")
-			}
-
 			decryptedData := make(map[string]string)
 
 			// decrypt the data in encryptedSecrets
 			for key, value := range encryptedSecret.Data {
-				decryptedString := editutils.DecodeAndDecrypt(value, keyPhrase)
+				decryptedString, err := providers.DecodeAndDecrypt(value, provider.(string))
+				if err != nil {
+					return fmt.Errorf("failed to decrypt value for %s %s", key, err.Error())
+				}
 
-				decryptedData[key] = string(decryptedString)
+				decryptedData[key] = decryptedString
 			}
 
 			decryptedSecret.Data = decryptedData
@@ -95,7 +101,7 @@ func init() {
 			newEncryptedData := make(map[string]string)
 
 			for key, value := range newDecryptedSecret.Data {
-				encryptedString, err := editutils.EncryptAndEncode(value, keyPhrase)
+				encryptedString, err := providers.EncryptAndEncode(value, provider.(string))
 				if err != nil {
 					return fmt.Errorf("error encrypting new secrets %s", err)
 				}
