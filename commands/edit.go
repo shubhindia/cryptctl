@@ -62,11 +62,6 @@ func init() {
 				Metadata:   encryptedSecret.Metadata,
 			}
 
-			keyPhrase := os.Getenv("KEYPHRASE")
-			if keyPhrase == "" {
-				return fmt.Errorf("keyphrase not found")
-			}
-
 			decryptedData := make(map[string]string)
 
 			// decrypt the data in encryptedSecrets

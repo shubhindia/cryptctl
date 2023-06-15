@@ -3,7 +3,7 @@ module github.com/shubhindia/cryptctl
 go 1.20
 
 require (
-	github.com/shubhindia/crypt-core v0.0.0-20230614161221-b23fff685fb4
+	github.com/shubhindia/crypt-core v0.0.0-20230615045549-1a40bdfe259d
 	github.com/sirupsen/logrus v1.9.3
 	github.com/urfave/cli/v2 v2.25.6
 	gopkg.in/yaml.v2 v2.4.0
@@ -43,9 +43,9 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.27.2 // indirect
-	k8s.io/apimachinery v0.27.2 // indirect
-	k8s.io/client-go v0.27.2 // indirect
+	k8s.io/api v0.26.2 // indirect
+	k8s.io/apimachinery v0.26.2 // indirect
+	k8s.io/client-go v0.26.2 // indirect
 	k8s.io/klog/v2 v2.90.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230501164219-8b0f38b5fd1f // indirect
 	k8s.io/utils v0.0.0-20230209194617-a36077c30491 // indirect
