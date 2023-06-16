@@ -81,6 +81,9 @@ var editCmd = &cobra.Command{
 
 		// // decrypt the data in encryptedSecrets
 		for key, value := range encryptedSecret.Data {
+
+			// ToDo: current implementation calls for decryptionKey for each value even though the key is same.
+			// Need to change this behaviour because it is expensive both in terms of compute and cost
 			decryptedString, err := providers.DecodeAndDecrypt(value, provider)
 			if err != nil {
 				return fmt.Errorf("failed to decrypt value for %s %s", key, err.Error())
