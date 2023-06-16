@@ -34,7 +34,7 @@ var createCmd = &cobra.Command{
 		fileName := args[0]
 		provider := args[1]
 
-		sampleEncryptedSecret := secretsv1alpha1.EncryptedSecret{
+		sampleEncryptedSecret := &secretsv1alpha1.EncryptedSecret{
 			ObjectMeta: v1.ObjectMeta{
 				Name:      "encryptedsecret-sample",
 				Namespace: "default",
@@ -45,16 +45,19 @@ var createCmd = &cobra.Command{
 			},
 		}
 
-		commonLabels := map[string]string{
+		// set some sample labels
+		sampleEncryptedSecret.SetLabels(map[string]string{
 			"app.kubernetes.io/name":       "encryptedsecret",
 			"app.kubernetes.io/instance":   "encryptedsecret-sample",
 			"app.kubernetes.io/part-of":    "encryted-secrets",
 			"app.kubernetes.io/managed-by": "kustomize",
 			"app.kubernetes.io/created-by": "encryted-secrets",
-			"app.kubernetes.io/provider":   provider,
-		}
+		})
 
-		sampleEncryptedSecret.SetLabels(commonLabels)
+		// set provider annotation
+		sampleEncryptedSecret.SetAnnotations(map[string]string{
+			"secrets.shubhindia.xyz/provider": provider,
+		})
 
 		// write the contents to yaml
 		newEncrypted, err := yaml.Marshal(&sampleEncryptedSecret)

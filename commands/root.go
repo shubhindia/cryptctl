@@ -2,8 +2,12 @@ package commands
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/kubernetes/scheme"
+
+	apis "github.com/shubhindia/cryptctl/apis"
 )
 
 var rootCmd = &cobra.Command{
@@ -18,8 +22,13 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+func init() {
+	_ = apis.AddToScheme(scheme.Scheme)
+}
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		panic(err)
+		fmt.Printf("error: %s\n", err.Error())
+		os.Exit(1)
 	}
 }

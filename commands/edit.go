@@ -14,7 +14,6 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/yaml"
 
-	apis "github.com/shubhindia/cryptctl/apis"
 	secretsv1alpha1 "github.com/shubhindia/cryptctl/apis/secrets/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -29,22 +28,17 @@ const (
 )
 
 func init() {
-	_ = apis.AddToScheme(scheme.Scheme)
 	rootCmd.AddCommand(editCmd)
-
 }
 
 var editCmd = &cobra.Command{
 	Use:   "edit [flags]",
 	Short: "edit encryptedSecrets manifest",
-	Long:  `Edit a EncryptedSecret manifest file that contains encrypted secret values`,
-	Args: func(_ *cobra.Command, args []string) error {
-
+	Long:  "Edit an EncryptedSecret manifest file that contains encrypted secret values",
+	PreRunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
-
-			os.Exit(1)
+			return fmt.Errorf("filename is required")
 		}
-
 		return nil
 	},
 	RunE: func(_ *cobra.Command, args []string) error {
@@ -73,14 +67,10 @@ var editCmd = &cobra.Command{
 		}
 
 		//  ToDo := use k8s labels here so that we can actually use label methods instead of converting interface to map again
-		provider := "k8s"
+		provider := encryptedSecret.GetAnnotations()["secrets.shubhindia.xyz/provider"]
 
 		decryptedSecret := secretsv1alpha1.DecryptedSecret{
-			ObjectMeta: v1.ObjectMeta{
-				Name:      encryptedSecret.Name,
-				Namespace: encryptedSecret.Namespace,
-				Labels:    encryptedSecret.Labels,
-			},
+			ObjectMeta: encryptedSecret.ObjectMeta,
 			TypeMeta: v1.TypeMeta{
 				APIVersion: secretApiVersion,
 				Kind:       decryptedSecretKind,
