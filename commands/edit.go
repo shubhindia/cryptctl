@@ -89,6 +89,11 @@ var editCmd = &cobra.Command{
 				return fmt.Errorf("failed to decrypt value for %s %s", key, err.Error())
 			}
 
+			// just a check to handle emptyStrings until I get the errors to pop up correctly
+			if decryptedString == "" {
+				return fmt.Errorf("failed to decrypt value for %s", key)
+			}
+
 			decryptedData[key] = decryptedString
 		}
 
