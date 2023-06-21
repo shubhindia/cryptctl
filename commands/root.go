@@ -7,7 +7,12 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/kubernetes/scheme"
 
-	apis "github.com/shubhindia/cryptctl/apis"
+	secretsv1alpha1 "github.com/shubhindia/encrypted-secrets/api/v1alpha1"
+)
+
+const (
+	SecretApiVersion    = "secrets.shubhindia.xyz/v1alpha1"
+	DecryptedSecretKind = "DecryptedSecret"
 )
 
 var rootCmd = &cobra.Command{
@@ -23,7 +28,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	_ = apis.AddToScheme(scheme.Scheme)
+	_ = secretsv1alpha1.AddToScheme(scheme.Scheme)
 }
 
 func Execute() {

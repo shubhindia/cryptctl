@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/yaml"
 
-	secretsv1alpha1 "github.com/shubhindia/cryptctl/apis/secrets/v1alpha1"
+	secretsv1alpha1 "github.com/shubhindia/encrypted-secrets/api/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -40,7 +40,7 @@ var createCmd = &cobra.Command{
 				Namespace: "default",
 			},
 			TypeMeta: v1.TypeMeta{
-				APIVersion: secretApiVersion,
+				APIVersion: SecretApiVersion,
 				Kind:       "EncryptedSecret",
 			},
 		}
@@ -48,9 +48,7 @@ var createCmd = &cobra.Command{
 		// set some sample labels
 		sampleEncryptedSecret.SetLabels(map[string]string{
 			"app.kubernetes.io/name":       "encryptedsecret",
-			"app.kubernetes.io/instance":   "encryptedsecret-sample",
 			"app.kubernetes.io/part-of":    "encryted-secrets",
-			"app.kubernetes.io/managed-by": "kustomize",
 			"app.kubernetes.io/created-by": "encryted-secrets",
 		})
 

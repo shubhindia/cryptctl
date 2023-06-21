@@ -14,17 +14,11 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/yaml"
 
-	secretsv1alpha1 "github.com/shubhindia/cryptctl/apis/secrets/v1alpha1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	secretsv1alpha1 "github.com/shubhindia/encrypted-secrets/api/v1alpha1"
 )
 
 var (
 	whitespaceRegexp *regexp.Regexp
-)
-
-const (
-	secretApiVersion    = "secrets.shubhindia.xyz/v1alpha1"
-	decryptedSecretKind = "DecryptedSecret"
 )
 
 func init() {
@@ -50,8 +44,8 @@ var editCmd = &cobra.Command{
 
 		codecs := serializer.NewCodecFactory(scheme.Scheme, serializer.EnableStrict)
 		obj, _, err := codecs.UniversalDeserializer().Decode(encryptedFile, &schema.GroupVersionKind{
-			Group:   secretsv1alpha1.SchemeGroupVersion.Group,
-			Version: secretsv1alpha1.SchemeGroupVersion.Version,
+			Group:   secretsv1alpha1.GroupVersion.Group,
+			Version: SecretApiVersion,
 			Kind:    "EncryptedSecret",
 		}, nil)
 		if err != nil {
@@ -61,92 +55,52 @@ var editCmd = &cobra.Command{
 			panic(err)
 		}
 
+		// convert the runtimeObj to encryptedSecret object
 		encryptedSecret, ok := obj.(*secretsv1alpha1.EncryptedSecret)
 		if !ok {
-			panic("")
+			// should never happen
+			panic("failed to convert runtimeObject to encryptedSecret")
 		}
 
-		//  ToDo := use k8s labels here so that we can actually use label methods instead of converting interface to map again
-		provider := encryptedSecret.GetAnnotations()["secrets.shubhindia.xyz/provider"]
-
-		decryptedSecret := secretsv1alpha1.DecryptedSecret{
-			ObjectMeta: encryptedSecret.ObjectMeta,
-			TypeMeta: v1.TypeMeta{
-				APIVersion: secretApiVersion,
-				Kind:       decryptedSecretKind,
-			},
+		// get the decryptedSecret
+		decryptedObj, err := providers.DecodeAndDecrypt(encryptedSecret)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt value for %s", err.Error())
 		}
 
-		decryptedData := make(map[string]string)
-
-		// // decrypt the data in encryptedSecrets
-		for key, value := range encryptedSecret.Data {
-
-			// ToDo: current implementation calls for decryptionKey for each value even though the key is same.
-			// Need to change this behaviour because it is expensive both in terms of compute and cost
-			decryptedString, err := providers.DecodeAndDecrypt(value, provider)
-			if err != nil {
-				return fmt.Errorf("failed to decrypt value for %s %s", key, err.Error())
-			}
-
-			// just a check to handle emptyStrings until I get the errors to pop up correctly
-			if decryptedString == "" {
-				return fmt.Errorf("failed to decrypt value for %s", key)
-			}
-
-			decryptedData[key] = decryptedString
-		}
-
-		decryptedSecret.Data = decryptedData
-
-		// // marshal into yaml
-		decrypted, err := yaml.Marshal(&decryptedSecret)
+		// marshal into yaml
+		decrypted, err := yaml.Marshal(&decryptedObj)
 		if err != nil {
 			return fmt.Errorf("error marshaling decryptedSecret %s", err.Error())
 		}
 
+		// open editor to edit the decryptedSecret
 		editedManitest, err := editObjects(decrypted)
 		if err != nil {
 			return fmt.Errorf("error editing objects %s", err.Error())
 		}
 
-		// // unmarshal the edited yaml into decryptedSecrets again to encrypt the new secrets
-		// var newDecryptedSecret editutils.DecryptedSecret
-		newDecryptedSecret := secretsv1alpha1.DecryptedSecret{
-			ObjectMeta: v1.ObjectMeta{
-				Name:      encryptedSecret.Name,
-				Namespace: encryptedSecret.Namespace,
-				Labels:    encryptedSecret.Labels,
-			},
-			TypeMeta: v1.TypeMeta{
-				APIVersion: secretApiVersion,
-				Kind:       decryptedSecretKind,
-			},
-		}
+		// unmarshal the edited yaml into decryptedSecrets again to encrypt the new secrets
+		var newDecryptedSecret secretsv1alpha1.DecryptedSecret
+
 		err = yaml.Unmarshal(editedManitest, &newDecryptedSecret)
 		if err != nil {
 			return fmt.Errorf("error unmarshaling file %s", err.Error())
 		}
 
-		newEncryptedData := make(map[string]string)
-
-		for key, value := range newDecryptedSecret.Data {
-			encryptedString, err := providers.EncryptAndEncode(value, "k8s")
-			if err != nil {
-				return fmt.Errorf("error encrypting new secrets %s", err)
-			}
-			newEncryptedData[key] = encryptedString
+		// encrypt the modified data again
+		encryptedObj, err := providers.EncryptAndEncode(newDecryptedSecret)
+		if err != nil {
+			return fmt.Errorf("error encrypting new secrets %s", err)
 		}
 
-		// write newly encrypted data
-		encryptedSecret.Data = newEncryptedData
-
-		// // write the contents to yaml
-		newEncrypted, err := yaml.Marshal(&encryptedSecret)
+		// write the contents to yaml
+		newEncrypted, err := yaml.Marshal(&encryptedObj)
 		if err != nil {
 			return fmt.Errorf("error marshaling encryptedSecret %s", err.Error())
 		}
 
+		// finally, write the encryptedSecret yaml
 		err = os.WriteFile(fileName, newEncrypted, 0600)
 		if err != nil {
 			return fmt.Errorf("error writing EncryptedSecret %s", err)
