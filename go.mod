@@ -3,7 +3,6 @@ module github.com/shubhindia/cryptctl
 go 1.20
 
 require (
-	github.com/shubhindia/crypt-core v0.0.0-20230621144108-0f9919dbd74a
 	github.com/shubhindia/encrypted-secrets v0.0.0-20230621112604-6add3f3bbb35
 	github.com/spf13/cobra v1.7.0
 	k8s.io/apimachinery v0.27.2
@@ -13,10 +12,7 @@ require (
 
 // keeping this here just a reference and a quick switch for when I want to
 // test crypt-core from my local rather than remote
-// replace (
-// 	github.com/shubhindia/crypt-core => /Users/sgopale/Work/crypt-core
-//  	github.com/shubhindia/encrypted-secrets => /Users/sgopale/Work/encrypted-secrets
-// )
+// replace github.com/shubhindia/encrypted-secrets => /Users/sgopale/Work/encrypted-secrets
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
