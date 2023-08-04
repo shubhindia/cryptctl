@@ -3,7 +3,7 @@ module github.com/shubhindia/cryptctl
 go 1.20
 
 require (
-	github.com/shubhindia/encrypted-secrets v0.0.0-20230621112604-6add3f3bbb35
+	github.com/shubhindia/encrypted-secrets v0.0.0-20230804103637-c1f0571cb373
 	github.com/spf13/cobra v1.7.0
 	k8s.io/apimachinery v0.27.2
 	k8s.io/client-go v0.27.2
