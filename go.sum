@@ -90,10 +90,8 @@ github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
 github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
-github.com/shubhindia/crypt-core v0.0.0-20230621144108-0f9919dbd74a h1:GM01jOWKjQ1xrokZK8uWfzfaf3zI3ESPWmgrA6Fbqog=
-github.com/shubhindia/crypt-core v0.0.0-20230621144108-0f9919dbd74a/go.mod h1:nbGjoWX4I4m0kWu/FawZ25QHX9ccTG0HBNvFEy89VXE=
-github.com/shubhindia/encrypted-secrets v0.0.0-20230621112604-6add3f3bbb35 h1:0lwhsWypmbXVAs8cmx9XpbPkNKLkvHoEh5X95RpHboE=
-github.com/shubhindia/encrypted-secrets v0.0.0-20230621112604-6add3f3bbb35/go.mod h1:Lh6Ep1P9lO6X1H0xH8eaf7Rm9/7rUG7T02TzKHjFSJI=
+github.com/shubhindia/encrypted-secrets v0.0.0-20230804103637-c1f0571cb373 h1:a5hDvgtwVMuimtv350yhlP2P7hb2YPeFJdsHDsP7MuY=
+github.com/shubhindia/encrypted-secrets v0.0.0-20230804103637-c1f0571cb373/go.mod h1:Wp7px6ZedbwNOcZtSU1zsgGjWfCsk4xqMSJbJtqxWrU=
 github.com/spf13/cobra v1.7.0 h1:hyqWnYt1ZQShIddO5kBpj3vu05/++x6tJ6dg8EC572I=
 github.com/spf13/cobra v1.7.0/go.mod h1:uLxZILRyS/50WlhOIKD7W6V5bgeIt+4sICxh6uRMrb0=
 github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=
