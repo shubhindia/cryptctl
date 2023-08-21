@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/shubhindia/encrypted-secrets v0.0.0-20230804103637-c1f0571cb373
 	github.com/spf13/cobra v1.7.0
+	k8s.io/api v0.27.2
 	k8s.io/apimachinery v0.27.2
 	k8s.io/client-go v0.27.2
 	sigs.k8s.io/yaml v1.3.0
@@ -48,7 +49,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.27.2 // indirect
 	k8s.io/klog/v2 v2.90.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230501164219-8b0f38b5fd1f // indirect
 	k8s.io/utils v0.0.0-20230209194617-a36077c30491 // indirect
