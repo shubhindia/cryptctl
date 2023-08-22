@@ -8,9 +8,9 @@ import (
 func init() {
 
 	initCmd.Flags().StringVarP(&Namespace, "namespace", "n", "", "namespace to use (required)")
-	initCmd.MarkFlagRequired("namespace")
+	_ = initCmd.MarkFlagRequired("namespace")
 	initCmd.Flags().StringVarP(&Provider, "provider", "p", "", "provider to use (required)")
-	initCmd.MarkFlagRequired("provider")
+	_ = initCmd.MarkFlagRequired("provider")
 	rootCmd.AddCommand(initCmd)
 }
 

@@ -84,7 +84,7 @@ func GeneratePrivateKeyAndCert(keySize int, validFor time.Duration, cn string) (
 	}
 
 	certPEM := new(bytes.Buffer)
-	pem.Encode(certPEM, &pem.Block{
+	_ = pem.Encode(certPEM, &pem.Block{
 		Type:  "CERTIFICATE",
 		Bytes: data,
 	})

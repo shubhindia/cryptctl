@@ -14,9 +14,9 @@ import (
 func init() {
 
 	createCmd.Flags().StringVarP(&Provider, "provider", "p", "", "provider to use (required)")
-	createCmd.MarkFlagRequired("provider")
+	_ = createCmd.MarkFlagRequired("provider")
 	createCmd.Flags().StringVarP(&Filename, "filename", "f", "", "filename to use (required)")
-	createCmd.MarkFlagRequired("filename")
+	_ = createCmd.MarkFlagRequired("filename")
 	rootCmd.AddCommand(createCmd)
 }
 
