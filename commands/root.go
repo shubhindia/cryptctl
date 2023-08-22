@@ -10,6 +10,12 @@ import (
 	secretsv1alpha1 "github.com/shubhindia/encrypted-secrets/api/v1alpha1"
 )
 
+var (
+	Namespace string
+	Provider  string
+	Filename  string
+)
+
 const (
 	SecretApiVersion    = "secrets.shubhindia.xyz/v1alpha1"
 	DecryptedSecretKind = "DecryptedSecret"

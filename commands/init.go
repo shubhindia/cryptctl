@@ -5,11 +5,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	Namespace string
-	Provider  string
-)
-
 func init() {
 
 	initCmd.Flags().StringVarP(&Namespace, "namespace", "n", "", "namespace to use (required)")
