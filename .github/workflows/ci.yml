@@ -32,6 +32,8 @@ jobs:
         run: |
           make ARCH=arm64 build_macos
           make ARCH=amd64 build_macos
+          make ARCH=arm64 build_linux
+          make ARCH=amd64 build_linux
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
         env:
