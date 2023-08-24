@@ -11,9 +11,11 @@ import (
 )
 
 var (
-	Namespace string
-	Provider  string
-	Filename  string
+	Namespace   string
+	Provider    string
+	Filename    string
+	Version     string
+	versionFlag bool
 )
 
 const (
@@ -26,6 +28,10 @@ var rootCmd = &cobra.Command{
 	Short:         "cryptctl is a command line tool for managing EncryptedSecrets",
 	SilenceErrors: true,
 	RunE: func(_ *cobra.Command, args []string) error {
+		if versionFlag {
+			fmt.Printf("cryptctl version: %s\n", Version)
+			return nil
+		}
 		if len(args) == 0 {
 			return fmt.Errorf("no command specified")
 		}
@@ -34,6 +40,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
+	rootCmd.Flags().BoolVar(&versionFlag, "version", false, "--version")
 	_ = secretsv1alpha1.AddToScheme(scheme.Scheme)
 }
 
