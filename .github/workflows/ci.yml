@@ -30,11 +30,12 @@ jobs:
           go-version-file: go.mod
       - name: Configure variables
         run: |
-          source variables.sh
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
       - name: Release
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.PUSH_TOKEN }}
+          VERSION: ${{ env.VERSION }}
         uses: goreleaser/goreleaser-action@v3
         with:
-          args: release --rm-dist
+          args: release --clean
