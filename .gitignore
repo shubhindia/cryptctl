@@ -3,3 +3,5 @@ build
 
 # ignore yamls 
 *.yaml
+
+dist/
