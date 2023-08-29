@@ -36,3 +36,15 @@ brew install shubhindia/cryptctl/cryptctl
 ```
 
 - Windows: Download the latest release from [here](https://github.com/shubhindia/cryptctl/releases)
+
+# Usage
+## Pre-requisites
+- Make sure you have EDITOR environment variable set to your preferred editor. (e.g. `export EDITOR=vim`)
+- Make sure you have a kubernetes cluster running and `kubectl` is configured to access the cluster in case of `k8s` provider and if you are using `aws-kms` provider make sure you have aws credentials configured.
+
+## Commands
+**1. init:** Initialize the encryption provider. This command will create an encryption certificate in the namespace provided if you are using `k8s` provider and will create a kms key if you are using `aws-kms` provider.
+
+**2. create:** This command will create an `EncryptedSecret` object manifest with the provided inputs and provider.
+
+**3. edit:** This command will open the provided `EncryptedSecret` object manifest in the editor provided by the EDITOR environment variable. Once the file is saved, it will create the `EncryptedSecret` object manifest which you can apply.
