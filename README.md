@@ -23,3 +23,16 @@ Here's a **`cryptctl`** demo:
 
 - `cryptctl create -f <filename> -p <provider>`
 ![cryptctl edit demo GIF](img/cryptctl-create-demo.gif)
+
+
+## Installation
+
+- Linux: Download the latest release from [here](https://github.com/shubhindia/cryptctl/releases)
+
+- Mac (you can use [Homebrew](https://brew.sh/) to install `cryptctl` on Mac):
+```bash
+brew tap shubhindia/cryptctl
+brew install shubhindia/cryptctl/cryptctl
+```
+
+- Windows: Download the latest release from [here](https://github.com/shubhindia/cryptctl/releases)
