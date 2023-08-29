@@ -10,7 +10,6 @@ import (
 func init() {
 
 	initCmd.Flags().StringVarP(&Namespace, "namespace", "n", "", "namespace to use (required)")
-	// _ = initCmd.MarkFlagRequired("namespace")
 	initCmd.Flags().StringVarP(&Provider, "provider", "p", "", "provider to use (required)")
 	_ = initCmd.MarkFlagRequired("provider")
 	rootCmd.AddCommand(initCmd)
