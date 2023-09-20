@@ -48,3 +48,10 @@ brew install shubhindia/cryptctl/cryptctl
 **2. create:** This command will create an `EncryptedSecret` object manifest with the provided inputs and provider.
 
 **3. edit:** This command will open the provided `EncryptedSecret` object manifest in the editor provided by the EDITOR environment variable. Once the file is saved, it will create the `EncryptedSecret` object manifest which you can apply.
+
+## Comparison with some other popular alternatives
+
+| Tool     | Namespaced Encryption Keys | Multiple Providers Support | Auto Key Renewal | Client Side Decryption Support |
+|:--------:|:------------------------:|:--------------------------:|:----------------:|:------------------------------:|
+| cryptctl | ✅                        | ✅                          | ❌                | ✅                              |
+| kubeseal | ❌                        | ❌                          | ✅                | ❌                              |
