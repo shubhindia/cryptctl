@@ -65,7 +65,7 @@ var editCmd = &cobra.Command{
 		// get the decryptedSecret
 		decryptedObj, err := providers.DecodeAndDecrypt(encryptedSecret)
 		if err != nil {
-			return fmt.Errorf("failed to decrypt value for %s", err.Error())
+			return err
 		}
 
 		// marshal into yaml
