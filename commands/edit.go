@@ -100,8 +100,11 @@ var editCmd = &cobra.Command{
 			return fmt.Errorf("error marshaling encryptedSecret %s", err.Error())
 		}
 
+		// just a simple hack to remove status field from the yaml
+		re := regexp.MustCompile(`status:[\s\S]*?(?:---|$)`)
+		result := re.ReplaceAll(newEncrypted, nil)
 		// finally, write the encryptedSecret yaml
-		err = os.WriteFile(fileName, newEncrypted, 0600)
+		err = os.WriteFile(fileName, result, 0600)
 		if err != nil {
 			return fmt.Errorf("error writing EncryptedSecret %s", err)
 		}
